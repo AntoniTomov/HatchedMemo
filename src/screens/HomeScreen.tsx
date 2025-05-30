@@ -7,11 +7,11 @@ import { useChildren, Child } from '../hooks/useChildren';
 import { useFriends } from '../hooks/useFriends';
 import { getDaysUntilBirthday } from '../utils/dataUtils';
 import HomeContent from '../components/HomeContent';
-import CalendarView from '../components/CalendarView';
+import CalendarView from './CalendarView';
 import UpcomingBirthdays from '../components/UpcomingBirthdays';
 import NewsFeed from '../components/NewsFeed';
-import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Define types based on usage and assumed structure from web version
 interface BirthdayUser {
@@ -53,7 +53,8 @@ const HomeScreen: React.FC = () => {
   const handleContinue = () => {
     // Assuming setUser is adapted for RN context and updates onboarding status
     if (user) {
-       setUser({ ...user, isOnboarded: true });
+       // Ensure isOnboarded is a strict boolean
+       setUser({ ...user, isOnboarded: true as boolean });
     }
   };
 

@@ -6,11 +6,11 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { Button } from './ui/button';
-import { Switch } from './ui/switch';
+import { Button } from './ui/Button';
 import ChildList from './ChildList';
 import { useBirthday } from '../contexts/BirthdayContext';
 import { useChildren } from '../hooks/useChildren';
+import { Switch } from './ui/switch';
 
 interface HomeContentProps {
   onContinue: () => void;
@@ -19,7 +19,7 @@ interface HomeContentProps {
 const HomeContent: React.FC<HomeContentProps> = ({ onContinue }) => {
   const { user, setUser } = useBirthday();
   const { children } = useChildren();
-  const [hasChildren, setHasChildren] = useState<boolean>(user.hasChildren || children.length > 0);
+  const [hasChildren, setHasChildren] = useState<boolean>(user?.hasChildren || children.length > 0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   
   useEffect(() => {
@@ -27,15 +27,19 @@ const HomeContent: React.FC<HomeContentProps> = ({ onContinue }) => {
       setHasChildren(true);
       setUser({
         ...user,
+        name: user?.name || '',
+        isOnboarded: user?.isOnboarded ?? false,
         hasChildren: true
       });
     }
-  }, [children.length]);
+  }, [children.length, user, setUser]);
   
   const handleToggleChildren = (checked: boolean) => {
     setHasChildren(checked);
     setUser({
       ...user,
+      name: user?.name || '',
+      isOnboarded: user?.isOnboarded ?? false,
       hasChildren: checked
     });
   };

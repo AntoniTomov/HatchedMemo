@@ -7,13 +7,13 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import { Label } from './ui/label';
 import { Select } from './ui/select';
-import { Calendar } from './ui/calendar';
+import { Calendar } from './ui/Calendar';
 import { format } from 'date-fns';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../hooks/useToast';
 
 interface AddBirthdayFormProps {
   onClose: () => void;
@@ -25,24 +25,24 @@ const AddBirthdayForm: React.FC<AddBirthdayFormProps> = ({ onClose }) => {
   const [relationship, setRelationship] = useState('');
   const [showCalendar, setShowCalendar] = useState(false);
   
-  const { toast } = useToast();
+  const { showToast } = useToast();
   
   const handleSubmit = () => {
     if (name.trim() === '') {
-      toast({
+      showToast({
         title: "Name required",
         description: "Please enter a name for this contact",
         variant: "destructive"
-      });
+      } as any);
       return;
     }
     
     if (!date) {
-      toast({
+      showToast({
         title: "Date required",
         description: "Please select a birth date",
         variant: "destructive"
-      });
+      } as any);
       return;
     }
     
@@ -57,10 +57,10 @@ const AddBirthdayForm: React.FC<AddBirthdayFormProps> = ({ onClose }) => {
     //   avatarUrl: `https://i.pravatar.cc/150?img=${randomAvatarId}`
     // });
     
-    toast({
+    showToast({
       title: "Birthday added",
       description: `You'll be reminded of ${name}'s birthday!`
-    });
+    } as any);
     
     onClose();
   };
@@ -95,10 +95,9 @@ const AddBirthdayForm: React.FC<AddBirthdayFormProps> = ({ onClose }) => {
           
           {showCalendar && (
             <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(newDate) => {
-                setDate(newDate);
+              selected={date ? format(date, 'yyyy-MM-dd') : undefined}
+              onDayPress={(day: { dateString: string }) => {
+                setDate(new Date(day.dateString));
                 setShowCalendar(false);
               }}
             />
@@ -122,14 +121,14 @@ const AddBirthdayForm: React.FC<AddBirthdayFormProps> = ({ onClose }) => {
         <View style={styles.buttonGroup}>
           <Button
             onPress={handleSubmit}
-            style={[styles.button, styles.saveButton]}
+            style={{ ...styles.button, ...styles.saveButton }}
           >
             Save Birthday
           </Button>
           <Button
             onPress={onClose}
             variant="outline"
-            style={[styles.button, styles.cancelButton]}
+            style={{ ...styles.button, ...styles.cancelButton }}
           >
             Cancel
           </Button>

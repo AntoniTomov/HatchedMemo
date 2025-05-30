@@ -43,10 +43,10 @@ const NewsFeed: React.FC = () => {
           <View style={styles.content}>
             <Text style={styles.newsText}>{item.content}</Text>
           </View>
-          {item.image_url && (
+          {item.imageUrl && (
             <View style={styles.imageContainer}>
               <Image 
-                source={{ uri: item.image_url }}
+                source={{ uri: item.imageUrl }}
                 style={styles.image}
                 resizeMode="cover"
               />

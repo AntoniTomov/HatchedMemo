@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+import { User } from '../types/types'; // Import User from shared types
 
 export interface BirthdayContact {
   id: string;
@@ -11,22 +12,6 @@ export interface BirthdayContact {
   imageUrl?: string;
   avatarUrl?: string;
   friend_id?: string;
-}
-
-export interface User {
-  name: string;
-  isOnboarded: boolean;
-  avatarUrl?: string;
-  hasChildren?: boolean;
-  children?: {
-    id: string;
-    name: string;
-    birthDate: string;
-    gender: string;
-    daysToBirthday?: number;
-    notes?: string;
-    notificationPreference?: string;
-  }[];
 }
 
 interface BirthdayContextType {
@@ -121,6 +106,8 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error('Failed to remove birthday:', err);
       Alert.alert('Error', err.message || 'Failed to remove birthday contact');
       throw err;
+    } finally {
+      setLoading(false);
     }
   }, []);
 

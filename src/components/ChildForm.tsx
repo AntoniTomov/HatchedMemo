@@ -9,8 +9,8 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import { Label } from './ui/label';
 import { Select } from './ui/select';
 import { Calendar } from './ui/Calendar';
