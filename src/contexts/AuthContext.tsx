@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 interface User {
   id: string;
@@ -15,12 +16,19 @@ interface Profile {
   avatarUrl?: string;
 }
 
+interface AuthUser {
+  id?: string;
+  email?: string;
+  full_name?: string;
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   profile: Profile | null;
   loading: boolean;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, full_name?: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
@@ -30,55 +38,140 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+const BASE_URL = 'http://localhost:3000';
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      // TODO: Implement actual API call
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: 'John Doe',
-      };
-      setUser(mockUser);
-      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        setLoading(true);
+        const storedToken = await AsyncStorage.getItem('userToken');
+        if (storedToken) {
+          setToken(storedToken);
+          try {
+            const profileResponse = await fetch(`${BASE_URL}/profiles/me`, {
+              headers: {
+                'Authorization': `Bearer ${storedToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (profileResponse.ok) {
+              const profileData = await profileResponse.json();
+              setUser({ id: profileData.id, email: profileData.email, full_name: profileData.full_name });
+            } else {
+              await AsyncStorage.removeItem('userToken');
+              setToken(null);
+              setUser(null);
+              console.error('Failed to fetch user profile on startup', profileResponse.status);
+            }
+          } catch (profileError) {
+            console.error('Error fetching user profile on startup', profileError);
+            await AsyncStorage.removeItem('userToken');
+            setToken(null);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error('Failed to load user token from storage', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+  const signIn = async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      // TODO: Implement actual API call
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: fullName,
-      };
-      setUser(mockUser);
-      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const response = await fetch(`${BASE_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-  const signOut = useCallback(async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement actual API call
+      const data = await response.json();
+
+      if (response.ok) {
+        const jwt = data.access_token;
+        const userData = data.user;
+        await AsyncStorage.setItem('userToken', jwt);
+        setToken(jwt);
+        setUser({ id: userData.id, email: userData.email });
+      } else {
+        setError(data.message || 'Sign in failed');
+        setUser(null);
+      }
+    } catch (err: any) {
+      console.error('Sign in error:', err);
+      setError(err.message || 'Network error during sign in');
       setUser(null);
-      setProfile(null);
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.removeItem('profile');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
+
+  const signUp = async (email: string, password: string, full_name?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, full_name }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const jwt = data.access_token;
+        const userData = data.user;
+        await AsyncStorage.setItem('userToken', jwt);
+        setToken(jwt);
+        setUser({ id: userData.id, email: userData.email });
+        Alert.alert('Success', 'Account created. Please sign in.');
+      } else {
+        setError(data.message || 'Sign up failed');
+        setUser(null);
+      }
+    } catch (err: any) {
+      console.error('Sign up error:', err);
+      setError(err.message || 'Network error during sign up');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await AsyncStorage.removeItem('userToken');
+      setToken(null);
+      setUser(null);
+    } catch (err: any) {
+      console.error('Sign out error:', err);
+      setError(err.message || 'Error signing out');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const signInWithGoogle = useCallback(async () => {
     try {
@@ -131,7 +224,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = useCallback(async (data: Partial<Profile>) => {
     try {
       setLoading(true);
-      // TODO: Implement actual API call
       if (!profile) {
         throw new Error('No profile to update');
       }
@@ -152,6 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         profile,
         loading,
+        error,
         signIn,
         signUp,
         signOut,

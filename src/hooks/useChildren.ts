@@ -1,14 +1,18 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 
-interface Child {
+export interface Child {
   id: string;
   name: string;
   birthDate: string;
-  gender: string;
+  gender?: string;
   daysToBirthday?: number;
   notes?: string;
   notificationPreference?: string;
+  avatarUrl?: string;
+  userId?: string;
+  fullName?: string;
+  parentName?: string;
 }
 
 export const useChildren = () => {

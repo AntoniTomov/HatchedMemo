@@ -10,10 +10,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { Sheet } from './ui/sheet';
 import ChildForm from './ChildForm';
 import { useChildren, Child } from '../hooks/useChildren';
 import { format } from 'date-fns';
+import { Sheet } from './ui/sheet';
 
 interface ChildListProps {
   drawerOpen: boolean;
@@ -56,7 +56,7 @@ const ChildList: React.FC<ChildListProps> = ({
     return (
       <View style={styles.container}>
         {children.map((child: Child) => {
-          const age = calculateAge(child.birth_date);
+          const age = calculateAge(child.birthDate);
           return (
             <TouchableOpacity 
               key={child.id}
@@ -69,13 +69,13 @@ const ChildList: React.FC<ChildListProps> = ({
                 </View>
                 <View style={styles.childDetails}>
                   <Text style={styles.childName}>{child.name}</Text>
-                  <Text style={styles.birthDate}>{formatBirthDate(child.birth_date)}</Text>
+                  <Text style={styles.birthDate}>{formatBirthDate(child.birthDate)}</Text>
                 </View>
               </View>
               <View style={styles.avatarContainer}>
-                {child.avatar_url ? (
+                {child.avatarUrl ? (
                   <Image 
-                    source={{ uri: child.avatar_url }} 
+                    source={{ uri: child.avatarUrl }} 
                     style={styles.avatar}
                   />
                 ) : (

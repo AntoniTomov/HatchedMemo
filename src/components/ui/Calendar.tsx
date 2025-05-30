@@ -14,6 +14,8 @@ interface CalendarProps {
     };
   };
   style?: ViewStyle;
+  fromDate?: Date;
+  toDate?: Date;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -21,6 +23,8 @@ const Calendar: React.FC<CalendarProps> = ({
   onDayPress,
   markedDates,
   style,
+  fromDate,
+  toDate,
 }) => {
   const theme = {
     backgroundColor: '#ffffff',
@@ -36,9 +40,9 @@ const Calendar: React.FC<CalendarProps> = ({
     arrowColor: '#9333ea',
     monthTextColor: '#1f2937',
     indicatorColor: '#9333ea',
-    textDayFontWeight: '400',
-    textMonthFontWeight: '600',
-    textDayHeaderFontWeight: '500',
+    textDayFontWeight: '400' as '400',
+    textMonthFontWeight: '600' as '600',
+    textDayHeaderFontWeight: '500' as '500',
   };
 
   return (
@@ -57,6 +61,8 @@ const Calendar: React.FC<CalendarProps> = ({
         enableSwipeMonths
         hideExtraDays
         firstDay={1}
+        minDate={fromDate?.toISOString().split('T')[0]}
+        maxDate={toDate?.toISOString().split('T')[0]}
       />
     </View>
   );

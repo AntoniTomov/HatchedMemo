@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { format, addYears } from 'date-fns';
-import { useChildren } from '@/hooks/useChildren';
-import { useFriends } from '@/hooks/useFriends';
-import { formatDate } from '@/utils/dateUtils';
+import { useChildren } from '../hooks/useChildren';
+import { useFriends } from '../hooks/useFriends';
+import { formatDate } from '../utils/dateUtils';
 import { Ionicons } from '@expo/vector-icons';
 
 const Birthdays: React.FC = () => {
@@ -54,19 +54,19 @@ const Birthdays: React.FC = () => {
     ...children.map(child => ({
       id: child.id,
       name: child.name,
-      birth_date: child.birth_date,
-      avatar_url: child.avatar_url,
-      user_id: child.user_id,
+      birth_date: child.birthDate,
+      avatar_url: child.avatarUrl,
+      user_id: child.userId,
       parent_name: 'You',
       isOwnChild: true
     })),
     ...friendsChildren.map(child => ({
       id: child.id,
       name: child.name,
-      birth_date: child.birth_date,
-      avatar_url: child.avatar_url,
-      user_id: child.user_id,
-      parent_name: child.parent_name,
+      birth_date: child.birthDate,
+      avatar_url: child.avatarUrl,
+      user_id: child.userId,
+      parent_name: child.parentName,
       isOwnChild: false
     }))
   ];
@@ -108,12 +108,9 @@ const Birthdays: React.FC = () => {
 
   const navigateToProfile = (birthday: any) => {
     if (birthday.isOwnChild) {
-      navigation.navigate('ChildProfile', { id: birthday.id });
+      navigation.navigate('ChildDetails', { childId: birthday.id, title: birthday.name });
     } else {
-      navigation.navigate('FriendProfile', { 
-        userId: birthday.user_id,
-        childId: birthday.id 
-      });
+      navigation.navigate('FriendDetails', { id: birthday.userId });
     }
   };
 

@@ -1,20 +1,13 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
+import { Child } from './useChildren';
 
-interface FriendChild {
-  id: string;
-  name: string;
-  birthDate: string;
-  gender: string;
-  avatarUrl?: string;
-}
-
-interface Friend {
+export interface Friend {
   id: string;
   name: string;
   email: string;
   avatarUrl?: string;
-  children?: FriendChild[];
+  children?: Child[];
 }
 
 export const useFriends = () => {
@@ -61,11 +54,11 @@ export const useFriends = () => {
     }
   }, []);
 
-  const addFriendChild = useCallback(async (friendId: string, child: Omit<FriendChild, 'id'>) => {
+  const addFriendChild = useCallback(async (friendId: string, child: Omit<Child, 'id'>) => {
     try {
       setLoading(true);
       // TODO: Implement API call
-      const newChild: FriendChild = {
+      const newChild: Child = {
         ...child,
         id: Math.random().toString(36).substr(2, 9),
       };
@@ -105,7 +98,7 @@ export const useFriends = () => {
     }
   }, []);
 
-  const updateFriendChild = useCallback(async (friendId: string, childId: string, child: Partial<FriendChild>) => {
+  const updateFriendChild = useCallback(async (friendId: string, childId: string, child: Partial<Child>) => {
     try {
       setLoading(true);
       // TODO: Implement API call
@@ -128,6 +121,7 @@ export const useFriends = () => {
   return {
     friends,
     loading,
+    friendsChildren: friends.flatMap(friend => friend.children || []),
     addFriend,
     removeFriend,
     updateFriend,
